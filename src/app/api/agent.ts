@@ -5,6 +5,7 @@ import { router } from '../router/Routes';
 const simulateSleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
 axios.defaults.baseURL = `http://localhost:5000/api/`;
+axios.defaults.withCredentials = true;
 
 const responseBody = (response: AxiosResponse) => response.data;
 
@@ -54,6 +55,14 @@ const Catalog = {
   details: (id: number) => requests.get(`products/${id}`),
 };
 
+const Cart = {
+  get: () => requests.get('cart'),
+  addItem: (productId: number, quantity = 1) =>
+    requests.post(`cart?productId=${productId}&quantity=${quantity}`, {}),
+  deleteItem: (productId: number, quantity = 1) =>
+    requests.delete(`cart?productId=${productId}&quantity=${quantity}`),
+};
+
 const TestErrors = {
   get400Error: () => requests.get('buggy/bad-request'),
   get401Error: () => requests.get('buggy/unauthorized'),
@@ -64,6 +73,7 @@ const TestErrors = {
 
 const agent = {
   Catalog,
+  Cart,
   TestErrors,
 };
 
