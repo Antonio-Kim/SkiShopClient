@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Grid,
   Paper,
   Table,
@@ -17,6 +18,7 @@ import { useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import CartSummary from './CartSummary';
 import { currencyFormat } from '../../app/utils/utils';
+import { Link } from 'react-router-dom';
 
 export default function CartPage() {
   const { cart, setCart, removeItem } = useStoreContext();
@@ -135,6 +137,15 @@ export default function CartPage() {
         <Grid item xs={6}>
           <CartSummary />
         </Grid>
+        <Button
+          component={Link}
+          to="/checkout"
+          variant="contained"
+          size="large"
+          fullWidth
+        >
+          Checkout
+        </Button>
       </Grid>
     </>
   );
