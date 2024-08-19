@@ -12,16 +12,18 @@ import {
   Typography,
 } from '@mui/material';
 import { Add, Delete, Remove } from '@mui/icons-material';
-import { useStoreContext } from '../../app/context/StoreContext';
 import agent from '../../app/api/agent';
 import { useState } from 'react';
 import { LoadingButton } from '@mui/lab';
 import CartSummary from './CartSummary';
 import { currencyFormat } from '../../app/utils/utils';
 import { Link } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../app/store/configureStore';
+import { removeItem, setCart } from './CartSlice';
 
 export default function CartPage() {
-  const { cart, setCart, removeItem } = useStoreContext();
+  const { cart } = useAppSelector((state) => state.cart);
+  const dispatch = useAppDispatch();
   const [status, setStatus] = useState({
     loading: false,
     name: '',
@@ -30,7 +32,7 @@ export default function CartPage() {
   function handleAddItem(productId: number, name: string) {
     setStatus({ loading: true, name });
     agent.Cart.addItem(productId)
-      .then((cart) => setCart(cart))
+      .then((cart) => dispatch(setCart(cart)))
       .catch((error) => console.log(error))
       .finally(() => setStatus({ loading: false, name: '' }));
   }
@@ -38,7 +40,7 @@ export default function CartPage() {
   function handleRemoveItem(productId: number, quantity = 1, name: string) {
     setStatus({ loading: true, name });
     agent.Cart.deleteItem(productId, quantity)
-      .then(() => removeItem(productId, quantity))
+      .then(() => dispatch(removeItem({ productId, quantity })))
       .catch((error) => console.log(error))
       .finally(() => setStatus({ loading: false, name: '' }));
   }

@@ -13,22 +13,23 @@ import { Link } from 'react-router-dom';
 import agent from '../../app/api/agent';
 import { useState } from 'react';
 import { LoadingButton } from '@mui/lab';
-import { useStoreContext } from '../../app/context/StoreContext';
 import { currencyFormat } from '../../app/utils/utils';
+import { useDispatch } from 'react-redux';
+import { setCart } from '../cart/CartSlice';
 
 type ProductCardProp = {
   product: Product;
 };
 
 export default function ProductCard({ product }: ProductCardProp) {
-  const { setCart } = useStoreContext();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
   function handleAddItem(productId: number) {
     setLoading(true);
     agent.Cart.addItem(productId)
+      .then((cart) => dispatch(setCart(cart)))
       .catch((error) => console.log(error))
-      .then((cart) => setCart(cart))
       .finally(() => setLoading(false));
   }
 
