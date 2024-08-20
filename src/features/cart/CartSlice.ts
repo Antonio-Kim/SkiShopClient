@@ -15,24 +15,23 @@ const initialState: CartState = {
 export const addCartItemAsync = createAsyncThunk<
   Cart,
   { productId: number; quantity?: number }
->('cart/addCartItemAsync', async ({ productId, quantity = 1 }) => {
+>('cart/addCartItemAsync', async ({ productId, quantity = 1 }, thunkAPI) => {
   try {
     return await agent.Cart.addItem(productId, quantity);
-  } catch (error) {
-    console.log(error);
-    return Promise.reject('error adding item');
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue({ error: error.data });
   }
 });
 
 export const removeCartItemAsync = createAsyncThunk<
   void,
   { productId: number; quantity: number; name?: string }
->('cart/removeCartItemAsync', async ({ productId, quantity }) => {
+>('cart/removeCartItemAsync', async ({ productId, quantity }, thunkAPI) => {
   try {
     await agent.Cart.deleteItem(productId, quantity);
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
-    return Promise.reject('error removing item');
+    return thunkAPI.rejectWithValue({ error: error.data });
   }
 });
 
@@ -53,8 +52,9 @@ export const cartSlice = createSlice({
       state.cart = action.payload;
       state.status = 'idle';
     });
-    builder.addCase(addCartItemAsync.rejected, (state) => {
+    builder.addCase(addCartItemAsync.rejected, (state, action) => {
       state.status = 'idle';
+      console.log(action.payload);
     });
     builder.addCase(removeCartItemAsync.pending, (state, action) => {
       state.status =
@@ -72,8 +72,9 @@ export const cartSlice = createSlice({
       }
       state.status = 'idle';
     });
-    builder.addCase(removeCartItemAsync.rejected, (state) => {
+    builder.addCase(removeCartItemAsync.rejected, (state, action) => {
       state.status = 'idle';
+      console.log(action.payload);
     });
   },
 });
