@@ -33,7 +33,6 @@ axios.interceptors.response.use(
         toast.error(data.title);
         break;
       case 500:
-        // toast.error(data.title);
         router.navigate('/server-error', { state: { error: data } });
         break;
       default:
@@ -44,14 +43,15 @@ axios.interceptors.response.use(
 );
 
 const requests = {
-  get: (url: string) => axios.get(url).then(responseBody),
+  get: (url: string, params?: URLSearchParams) =>
+    axios.get(url, { params }).then(responseBody),
   post: (url: string, body: object) => axios.post(url, body).then(responseBody),
   put: (url: string, body: object) => axios.put(url, body).then(responseBody),
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
 
 const Catalog = {
-  list: () => requests.get('products'),
+  list: (params: URLSearchParams) => requests.get('products', params),
   details: (id: number) => requests.get(`products/${id}`),
   fetchFilters: () => requests.get('products/filters'),
 };
