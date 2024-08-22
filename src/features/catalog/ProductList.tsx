@@ -8,7 +8,7 @@ type ProductListProps = {
 
 export default function ProductList({ products }: ProductListProps) {
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={4}>
       {products.map((product) => (
         <Grid item xs={4} key={product.id}>
           <ProductCard product={product} />
