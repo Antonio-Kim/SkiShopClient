@@ -6,20 +6,24 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Paper } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
-import agent from '../../app/api/agent';
 import { LoadingButton } from '@mui/lab';
+import { useAppDispatch } from '../../app/store/configureStore';
+import { signInUser } from './accountSlice';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
-  } = useForm();
+    formState: { isSubmitting, errors, isValid },
+  } = useForm({ mode: 'onTouched' });
 
   async function submitForm(data: FieldValues) {
-    await agent.Account.login(data);
+    await dispatch(signInUser(data));
+    navigate('/catalog');
   }
 
   return (
@@ -50,16 +54,21 @@ export default function LoginPage() {
           fullWidth
           label="Username"
           autoFocus
-          {...register('username')}
+          {...register('username', { required: 'Username is required' })}
+          error={!!errors.username}
+          helperText={errors?.username?.message as string}
         />
         <TextField
           margin="normal"
           fullWidth
           label="Password"
           type="password"
-          {...register('password')}
+          {...register('password', { required: 'Password is required' })}
+          error={!!errors.password}
+          helperText={errors?.password?.message as string}
         />
         <LoadingButton
+          disabled={!isValid}
           loading={isSubmitting}
           type="submit"
           fullWidth
