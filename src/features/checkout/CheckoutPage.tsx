@@ -18,6 +18,7 @@ import agent from '../../app/api/agent';
 import { useAppDispatch } from '../../app/store/configureStore';
 import { clearCart } from '../cart/CartSlice';
 import { LoadingButton } from '@mui/lab';
+import { StripeElementType } from '@stripe/stripe-js';
 
 const steps = ['Shipping address', 'Review your order', 'Payment details'];
 
@@ -26,6 +27,25 @@ export default function CheckoutPage() {
   const [orderNumber, setOrderNumber] = useState(0);
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const [cardState, setCardState] = useState<{
+    elementError: { [key in StripeElementType]?: string };
+  }>({ elementError: {} });
+  const [cardComplete, setCardComplete] = useState<any>({
+    cardNumber: false,
+    cardExpiry: false,
+    cardCvc: false,
+  });
+
+  function onCardInputChange(event: any) {
+    setCardState({
+      ...cardState,
+      elementError: {
+        ...cardState.elementError,
+        [event.elementType]: event.error?.message,
+      },
+    });
+    setCardComplete({ ...cardComplete, [event.elementType]: event.complete });
+  }
 
   function getStepContent(step: number) {
     switch (step) {
@@ -34,7 +54,12 @@ export default function CheckoutPage() {
       case 1:
         return <Review />;
       case 2:
-        return <PaymentForm />;
+        return (
+          <PaymentForm
+            cardState={cardState}
+            onCardInputChange={onCardInputChange}
+          />
+        );
       default:
         throw new Error('Unknown step');
     }
@@ -85,6 +110,19 @@ export default function CheckoutPage() {
     setActiveStep(activeStep - 1);
   };
 
+  const submitDisabled = (): boolean => {
+    if (activeStep === steps.length - 1) {
+      return (
+        !cardComplete.cardNumber ||
+        !cardComplete.cardCvc ||
+        !cardComplete.cardExpiry ||
+        !methods.formState.isValid
+      );
+    } else {
+      return !methods.formState.isValid;
+    }
+  };
+
   return (
     <FormProvider {...methods}>
       <Paper
@@ -124,7 +162,7 @@ export default function CheckoutPage() {
                 )}
                 <LoadingButton
                   loading={loading}
-                  disabled={!methods.formState.isValid}
+                  disabled={submitDisabled()}
                   variant="contained"
                   type="submit"
                   sx={{ mt: 3, ml: 1 }}
